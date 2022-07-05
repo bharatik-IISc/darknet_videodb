@@ -385,17 +385,6 @@ extern "C" void resize_window_cv(char const* window_name, int width, int height)
 }
 // ----------------------------------------
 
-extern "C" void move_window_cv(char const* window_name, int x, int y)
-{
-    try {
-        cv::moveWindow(window_name, x, y);
-    }
-    catch (...) {
-        cerr << "OpenCV exception: create_window_cv \n";
-    }
-}
-// ----------------------------------------
-
 extern "C" void destroy_all_windows_cv()
 {
     try {
@@ -845,15 +834,6 @@ extern "C" image get_image_from_stream_letterbox(cap_cv *cap, int w, int h, int 
 }
 // ----------------------------------------
 
-extern "C" void consume_frame(cap_cv *cap){
-    cv::Mat *src = NULL;
-    src = (cv::Mat *)get_capture_frame_cv(cap);
-    if (src)
-        delete src;
-}
-// ----------------------------------------
-
-
 // ====================================================================
 // Image Saving
 // ====================================================================
@@ -895,7 +875,7 @@ extern "C" void save_cv_jpg(mat_cv *img_src, const char *name)
 // ====================================================================
 // Draw Detection
 // ====================================================================
-extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output)
+extern "C" void draw_detections_cv_v3(int frame_id,mat_cv* mat, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output)
 {
     try {
         cv::Mat *show_img = (cv::Mat*)mat;
@@ -920,14 +900,49 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                         }
                         sprintf(buff, " (%2.0f%%)", dets[i].prob[j] * 100);
                         strcat(labelstr, buff);
-                        printf("%s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                        printf("%d, %s, %.0f%% ",frame_id, names[j], dets[i].prob[j] * 100);
                         if (dets[i].track_id) printf("(track = %d, sim = %f) ", dets[i].track_id, dets[i].sim);
+                        
+                        
+	    	
                     }
                     else {
                         strcat(labelstr, ", ");
                         strcat(labelstr, names[j]);
-                        printf(", %s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                        printf("%d, %s, %.0f%% ",frame_id, names[j], dets[i].prob[j] * 100);
                     }
+                    
+                    
+                   	// @BK : *************** Add BBox print here ( START ) ****************
+                        
+                        box b = dets[i].bbox;
+		        if (std::isnan(b.w) || std::isinf(b.w)) b.w = 0.5;
+		        if (std::isnan(b.h) || std::isinf(b.h)) b.h = 0.5;
+		        if (std::isnan(b.x) || std::isinf(b.x)) b.x = 0.5;
+		        if (std::isnan(b.y) || std::isinf(b.y)) b.y = 0.5;
+		        b.w = (b.w < 1) ? b.w : 1;
+		        b.h = (b.h < 1) ? b.h : 1;
+		        b.x = (b.x < 1) ? b.x : 1;
+		        b.y = (b.y < 1) ? b.y : 1;
+		        
+		        //@BK : Uncommented this line
+		        // printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
+
+		        int left = (b.x - b.w / 2.)*show_img->cols;
+		        int right = (b.x + b.w / 2.)*show_img->cols;
+		        int top = (b.y - b.h / 2.)*show_img->rows;
+		        int bot = (b.y + b.h / 2.)*show_img->rows;
+
+		        if (left < 0) left = 0;
+		        if (right > show_img->cols - 1) right = show_img->cols - 1;
+		        if (top < 0) top = 0;
+		        if (bot > show_img->rows - 1) bot = show_img->rows - 1;
+		        
+		        // @BK : Added BBox print statement
+		    	printf(", %d %d %d %d \n",left, top, right, bot);
+		    	
+		    	// @BK : *************** Add BBox print here ( END ) **************** 
+                    
                 }
             }
             if (class_id >= 0) {
@@ -959,7 +974,9 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 b.h = (b.h < 1) ? b.h : 1;
                 b.x = (b.x < 1) ? b.x : 1;
                 b.y = (b.y < 1) ? b.y : 1;
-                //printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
+                
+                //@BK : Uncommented this line
+                // printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
 
                 int left = (b.x - b.w / 2.)*show_img->cols;
                 int right = (b.x + b.w / 2.)*show_img->cols;
@@ -970,7 +987,10 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 if (right > show_img->cols - 1) right = show_img->cols - 1;
                 if (top < 0) top = 0;
                 if (bot > show_img->rows - 1) bot = show_img->rows - 1;
-
+                
+                // @BK : Added BBox print statement
+	    	//printf(", %d %d %d %d",left, top, right, bot);
+                
                 //int b_x_center = (left + right) / 2;
                 //int b_y_center = (top + bot) / 2;
                 //int b_width = right - left;

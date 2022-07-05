@@ -48,7 +48,6 @@ image mat_to_image_cv(mat_cv *mat);
 // Window
 void create_window_cv(char const* window_name, int full_screen, int width, int height);
 void resize_window_cv(char const* window_name, int width, int height);
-void move_window_cv(char const* window_name, int x, int y);
 void destroy_all_windows_cv();
 int wait_key_cv(int delay);
 int wait_until_press_key_cv();
@@ -84,14 +83,14 @@ int set_capture_position_frame_cv(cap_cv *cap, int index);
 image get_image_from_stream_cpp(cap_cv *cap);
 image get_image_from_stream_resize(cap_cv *cap, int w, int h, int c, mat_cv** in_img, int dont_close);
 image get_image_from_stream_letterbox(cap_cv *cap, int w, int h, int c, mat_cv** in_img, int dont_close);
-void consume_frame(cap_cv *cap);
+
 
 // Image Saving
 void save_cv_png(mat_cv *img, const char *name);
 void save_cv_jpg(mat_cv *img, const char *name);
 
 // Draw Detection
-void draw_detections_cv_v3(mat_cv* show_img, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output);
+void draw_detections_cv_v3(int frame_id,mat_cv* show_img, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output);
 
 // Draw Loss & Accuracy chart
 mat_cv* draw_train_chart(char *windows_name, float max_img_loss, int max_batches, int number_of_lines, int img_size, int dont_show, char* chart_path);

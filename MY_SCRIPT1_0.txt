@@ -1,0 +1,3 @@
+./darknet detector demo cfg/coco.data cfg/yolov4.cfg yolov4.weights data/test50.mp4 -dont_show -out_filename res.avi
+
+/home/bharati/datasets/iiscVISE/15MinVideos/
