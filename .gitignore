@@ -11,7 +11,10 @@
 *.dylib
 *.pyc
 mnist/
-data/
+
+# Adding changes in data/ to the repo (undo gitignore)
+#data/
+
 caffe/
 grasp/
 images/
